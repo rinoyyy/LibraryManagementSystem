@@ -1,0 +1,28 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build folders
+**/bin/
+**/obj/
+
+# VS Code
+.vscode/
+
+# Node.js (for React)
+**/node_modules/
+**/dist/
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.*
+
+# OS files
+Thumbs.db
+.DS_Store
