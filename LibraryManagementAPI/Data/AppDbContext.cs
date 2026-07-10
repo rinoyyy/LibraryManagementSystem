@@ -26,6 +26,13 @@ namespace LibraryManagementAPI.Data
                 .HasOne(m => m.User)
                 .WithOne(u => u.Member)
                 .HasForeignKey<Member>(m => m.UserId);
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Username)
+                .IsUnique();
+
+            modelBuilder.Entity<Member>()
+                      .HasIndex(m => m.Email)
+                      .IsUnique();
         }
     }
 }
