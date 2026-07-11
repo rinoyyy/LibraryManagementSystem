@@ -34,6 +34,18 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddControllers();
 
+// -------------------- CORS --------------------
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ReactApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 // -------------------- Swagger --------------------
 
 builder.Services.AddEndpointsApiExplorer();
@@ -61,6 +73,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("ReactApp");
 
 app.UseAuthentication();
 
