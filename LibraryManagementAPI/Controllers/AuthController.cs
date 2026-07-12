@@ -44,17 +44,14 @@ namespace LibraryManagementAPI.Controllers
         [HttpPost("login")]
         public IActionResult Login(LoginRequest request)
         {
-            var token = _authService.Login(request);
+            var response = _authService.Login(request);
 
-            if (token == null)
+            if (response == null)
             {
                 return Unauthorized("Invalid username or password.");
             }
 
-            return Ok(new
-            {
-                Token = token
-            });
+            return Ok(response);
         }
     }
 }

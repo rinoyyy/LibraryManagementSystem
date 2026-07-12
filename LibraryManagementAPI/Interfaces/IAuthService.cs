@@ -8,6 +8,6 @@ namespace LibraryManagementAPI.Interfaces
 
         bool RegisterAdmin(RegisterRequest request);
 
-        string? Login(LoginRequest request);
+        LoginResponse? Login(LoginRequest request);
     }
 }

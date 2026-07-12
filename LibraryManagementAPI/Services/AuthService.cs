@@ -75,7 +75,7 @@ namespace LibraryManagementAPI.Services
             return true;
         }
 
-        public string? Login(LoginRequest request)
+        public LoginResponse? Login(LoginRequest request)
         {
             var user = _context.Users
                 .FirstOrDefault(u => u.Username == request.Username);
@@ -100,8 +100,7 @@ namespace LibraryManagementAPI.Services
     };
 
             var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(
-                    _configuration["Jwt:Key"]!));
+                Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
 
             var credentials = new SigningCredentials(
                 key,
@@ -114,7 +113,12 @@ namespace LibraryManagementAPI.Services
                 expires: DateTime.UtcNow.AddHours(2),
                 signingCredentials: credentials);
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return new LoginResponse
+            {
+                Token = new JwtSecurityTokenHandler().WriteToken(token),
+                Username = user.Username,
+                Role = user.Role
+            };
         }
     }
 }
