@@ -13,24 +13,19 @@ namespace LibraryManagementAPI.Controllers
     {
         private readonly IBookService _bookService;
 
+        private readonly IUserService _userService;
+
         private readonly ILogger<BooksController> _logger;
 
         public BooksController(
-    IBookService bookService,
-    ILogger<BooksController> logger)
-        {
-            _bookService = bookService;
-
-            _logger = logger;
-        }
-
-        [HttpGet]
-        public IActionResult GetBooks()
-        {
-            _logger.LogInformation("Fetching all books.");
-
-            return Ok(_bookService.GetAllBooks());
-        }
+            IBookService bookService,
+            IUserService userService,
+            ILogger<BooksController> logger)
+            {
+                _bookService = bookService;
+                _userService = userService;
+                _logger = logger;
+            }
 
         [HttpGet("count")]
         public IActionResult GetBooksCount()
@@ -41,7 +36,7 @@ namespace LibraryManagementAPI.Controllers
         [HttpGet("{id:int}")]
         public IActionResult GetBookById(int id)
         {
-            Book? book = _bookService.GetBookById(id);
+            BookResponse? book = _bookService.GetBookById(id);
 
             if (book == null)
             {
@@ -51,16 +46,16 @@ namespace LibraryManagementAPI.Controllers
             return Ok(book);
         }
 
-        
+
         [Authorize(Roles = "Admin")]
-        [HttpPost] 
-        public IActionResult AddBook(Book book)
+        [HttpPost]
+        public IActionResult AddBook(AddBookRequest request)
         {
             _logger.LogInformation(
                 "Adding new book: {Title}",
-                book.Title);
+                request.Title);
 
-            Book newBook = _bookService.AddBook(book);
+            BookResponse newBook = _bookService.AddBook(request);
 
             _logger.LogInformation(
                 "Book added successfully with Id {Id}",
@@ -85,80 +80,167 @@ namespace LibraryManagementAPI.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-
         [HttpPut("{id}")]
-        public IActionResult UpdateBook(int id, Book updatedBook)
+        public IActionResult UpdateBook(int id, UpdateBookRequest request)
         {
-            var book = _bookService.UpdateBook(id, updatedBook);
+            _logger.LogInformation(
+                "Updating book with Id {Id}",
+                id);
+
+            BookResponse? book =
+                _bookService.UpdateBook(id, request);
 
             if (book == null)
             {
+                _logger.LogWarning(
+                    "Book with Id {Id} not found",
+                    id);
+
                 return NotFound();
             }
+
+            _logger.LogInformation(
+                "Book with Id {Id} updated successfully",
+                id);
 
             return Ok(book);
         }
 
-        [Authorize(Roles = "Admin")]
 
-        [HttpDelete("{id}")]
-        public IActionResult DeleteBook(int id)
+        [Authorize(Roles = "Student")]
+        [HttpPost("{id}/borrow")]
+        public IActionResult BorrowBook(int id)
         {
-            var deleted = _bookService.DeleteBook(id);
+            var username = User.Identity!.Name!;
 
-            if (!deleted)
+            var memberId = _userService.GetMemberId(username);
+
+            if (memberId == null)
             {
-                return NotFound();
+                _logger.LogWarning(
+                    "Member not found for username {Username}",
+                    username);
+
+                return Unauthorized();
             }
 
-            return NoContent();
-        }
-
-        
-        [Authorize(Roles = "Student")]
-        [HttpPost("borrow")]
-        public IActionResult BorrowBook(BorrowRequest request)
-        {
             _logger.LogInformation(
                 "Member {MemberId} is borrowing Book {BookId}",
-                request.MemberId,
-                request.BookId);
+                memberId,
+                id);
 
-            var success =
-                _bookService.BorrowBook(
-                    request.BookId,
-                    request.MemberId);
+            var success = _bookService.BorrowBook(id, memberId.Value);
 
             if (!success)
             {
                 _logger.LogWarning(
                     "Borrow failed for Member {MemberId} Book {BookId}",
-                    request.MemberId,
-                    request.BookId);
+                    memberId,
+                    id);
 
                 return BadRequest("Borrow operation failed.");
             }
 
             _logger.LogInformation(
                 "Borrow successful for Member {MemberId} Book {BookId}",
-                request.MemberId,
-                request.BookId);
+                memberId,
+                id);
 
             return Ok("Book borrowed successfully.");
         }
 
         [Authorize(Roles = "Student")]
-        [HttpPost("return")]
-        public IActionResult ReturnBook(BorrowRequest request)
+        [HttpPost("{id}/return")]
+        public IActionResult ReturnBook(int id)
         {
-            var success = _bookService.ReturnBook(request.BookId, request.MemberId);
+            var username = User.Identity!.Name!;
+
+            var memberId = _userService.GetMemberId(username);
+
+            if (memberId == null)
+            {
+                _logger.LogWarning(
+                    "Member not found for username {Username}",
+                    username);
+
+                return Unauthorized();
+            }
+
+            _logger.LogInformation(
+                "Member {MemberId} is returning Book {BookId}",
+                memberId,
+                id);
+
+            var success = _bookService.ReturnBook(id, memberId.Value);
 
             if (!success)
             {
+                _logger.LogWarning(
+                    "Return failed for Member {MemberId} Book {BookId}",
+                    memberId,
+                    id);
+
                 return BadRequest("Return operation failed.");
             }
 
+            _logger.LogInformation(
+                "Return successful for Member {MemberId} Book {BookId}",
+                memberId,
+                id);
+
             return Ok("Book returned successfully.");
+        }
+
+        [Authorize(Roles = "Student")]
+        [HttpGet("mybooks")]
+        public IActionResult GetMyBorrowedBooks()
+        {
+            var username = User.Identity!.Name!;
+
+            var memberId = _userService.GetMemberId(username);
+
+            if (memberId == null)
+            {
+                _logger.LogWarning(
+                    "Member not found for username {Username}",
+                    username);
+
+                return Unauthorized();
+            }
+
+            _logger.LogInformation(
+                "Fetching currently borrowed books for Member {MemberId}",
+                memberId);
+
+            var books = _bookService.GetCurrentBorrowedBooks(memberId.Value);
+
+            return Ok(books);
+        }
+
+        [Authorize(Roles = "Student")]
+        [HttpGet("history")]
+        public IActionResult GetBorrowHistory()
+        {
+            var username = User.Identity!.Name!;
+
+            var memberId = _userService.GetMemberId(username);
+
+            if (memberId == null)
+            {
+                _logger.LogWarning(
+                    "Member not found for username {Username}",
+                    username);
+
+                return Unauthorized();
+            }
+
+            _logger.LogInformation(
+                "Fetching borrow history for Member {MemberId}",
+                memberId);
+
+            var history = _bookService.GetBorrowHistory(memberId.Value);
+
+            return Ok(history);
         }
     }
 }

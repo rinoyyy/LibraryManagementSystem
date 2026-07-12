@@ -1,27 +1,32 @@
 ﻿using LibraryManagementAPI.Models;
+using LibraryManagementAPI.DTOs;
 
 namespace LibraryManagementAPI.Interfaces
 {
     public interface IBookService
     {
-        List<Book> GetAllBooks();
+        List<BookResponse> GetAllBooks();
 
-        Book? GetBookById(int id);
+        BookResponse? GetBookById(int id);
 
-        Book AddBook(Book book);
+        BookResponse AddBook(AddBookRequest request);
 
         int GetBookCount();
 
-        List<Book> SearchBooks(string keyword);
+        List<BookResponse> SearchBooks(string keyword);
 
-        List<Book> GetBooksSortedByYear();
+        List<BookResponse> GetBooksSortedByYear();
 
-        Book? UpdateBook(int id, Book updatedBook);
+        BookResponse? UpdateBook(int id, UpdateBookRequest request);
 
         bool DeleteBook(int id);
 
         bool BorrowBook(int bookId, int memberId);
 
         bool ReturnBook(int bookId, int memberId);
+
+        List<BorrowRecordResponse> GetCurrentBorrowedBooks(int memberId);
+
+        List<BorrowRecordResponse> GetBorrowHistory(int memberId);
     }
 }

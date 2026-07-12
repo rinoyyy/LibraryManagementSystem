@@ -2,6 +2,7 @@
 using LibraryManagementAPI.Interfaces;
 using LibraryManagementAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using LibraryManagementAPI.DTOs;
 
 namespace LibraryManagementAPI.Services
 {
@@ -14,23 +15,63 @@ namespace LibraryManagementAPI.Services
             _context = context;
         }
 
-        public List<Book> GetAllBooks()
+        public List<BookResponse> GetAllBooks()
         {
-            return _context.Books.ToList();
+            return _context.Books
+                .Select(book => new BookResponse
+                {
+                    Id = book.Id,
+                    Title = book.Title,
+                    Author = book.Author,
+                    PublishedYear = book.PublishedYear,
+                    TotalCopies = book.TotalCopies,
+                    AvailableCopies = book.AvailableCopies
+                })
+                .ToList();
         }
 
-        public Book? GetBookById(int id)
+        public BookResponse? GetBookById(int id)
         {
-            return _context.Books.FirstOrDefault(b => b.Id == id);
+            return _context.Books
+                .Where(book => book.Id == id)
+                .Select(book => new BookResponse
+                {
+                    Id = book.Id,
+                    Title = book.Title,
+                    Author = book.Author,
+                    PublishedYear = book.PublishedYear,
+                    TotalCopies = book.TotalCopies,
+                    AvailableCopies = book.AvailableCopies
+                })
+                .FirstOrDefault();
         }
 
-        public Book AddBook(Book book)
+        public BookResponse AddBook(AddBookRequest request)
         {
+            var book = new Book
+            {
+                Title = request.Title,
+                Author = request.Author,
+                PublishedYear = request.PublishedYear,
+                TotalCopies = request.TotalCopies,
+
+                // New books have all copies available
+                AvailableCopies = request.TotalCopies
+            };
+
             _context.Books.Add(book);
 
             _context.SaveChanges();
 
-            return book;
+            return new BookResponse
+            {
+                Id = book.Id,
+                Title = book.Title,
+                Author = book.Author,
+                PublishedYear = book.PublishedYear,
+                TotalCopies = book.TotalCopies,
+                AvailableCopies = book.AvailableCopies
+            };
         }
 
         public int GetBookCount()
@@ -38,21 +79,39 @@ namespace LibraryManagementAPI.Services
             return _context.Books.Count();
         }
 
-        public List<Book> SearchBooks(string keyword)
+        public List<BookResponse> SearchBooks(string keyword)
         {
             return _context.Books
-                           .Where(b => b.Title.Contains(keyword))
-                           .ToList();
+                .Where(book => book.Title.Contains(keyword))
+                .Select(book => new BookResponse
+                {
+                    Id = book.Id,
+                    Title = book.Title,
+                    Author = book.Author,
+                    PublishedYear = book.PublishedYear,
+                    TotalCopies = book.TotalCopies,
+                    AvailableCopies = book.AvailableCopies
+                })
+                .ToList();
         }
 
-        public List<Book> GetBooksSortedByYear()
+        public List<BookResponse> GetBooksSortedByYear()
         {
             return _context.Books
-                           .OrderBy(b => b.PublishedYear)
-                           .ToList();
+                .OrderBy(book => book.PublishedYear)
+                .Select(book => new BookResponse
+                {
+                    Id = book.Id,
+                    Title = book.Title,
+                    Author = book.Author,
+                    PublishedYear = book.PublishedYear,
+                    TotalCopies = book.TotalCopies,
+                    AvailableCopies = book.AvailableCopies
+                })
+                .ToList();
         }
 
-        public Book? UpdateBook(int id, Book updatedBook)
+        public BookResponse? UpdateBook(int id, UpdateBookRequest request)
         {
             var existingBook = _context.Books.FirstOrDefault(b => b.Id == id);
 
@@ -61,16 +120,23 @@ namespace LibraryManagementAPI.Services
                 return null;
             }
 
-            existingBook.Title = updatedBook.Title;
-            existingBook.Author = updatedBook.Author;
-            existingBook.ISBN = updatedBook.ISBN;
-            existingBook.PublishedYear = updatedBook.PublishedYear;
-            existingBook.TotalCopies = updatedBook.TotalCopies;
-            existingBook.AvailableCopies = updatedBook.AvailableCopies;
+            existingBook.Title = request.Title;
+            existingBook.Author = request.Author;
+            existingBook.PublishedYear = request.PublishedYear;
+            existingBook.TotalCopies = request.TotalCopies;
+            existingBook.AvailableCopies = request.AvailableCopies;
 
             _context.SaveChanges();
 
-            return existingBook;
+            return new BookResponse
+            {
+                Id = existingBook.Id,
+                Title = existingBook.Title,
+                Author = existingBook.Author,
+                PublishedYear = existingBook.PublishedYear,
+                TotalCopies = existingBook.TotalCopies,
+                AvailableCopies = existingBook.AvailableCopies
+            };
         }
 
         public bool DeleteBook(int id)
@@ -153,6 +219,49 @@ namespace LibraryManagementAPI.Services
             _context.SaveChanges();
 
             return true;
+        }
+
+        public List<BorrowRecordResponse> GetCurrentBorrowedBooks(int memberId)
+        {
+            return _context.BorrowRecords
+                .Include(br => br.Book)
+                .Include(br => br.Member)
+                .Where(br =>
+                    br.MemberId == memberId &&
+                    br.ReturnDate == null)
+                .Select(br => new BorrowRecordResponse
+                {
+                    BorrowRecordId = br.Id,
+                    BookId = br.BookId,
+                    BookTitle = br.Book!.Title,
+                    StudentName = br.Member!.Name,
+                    BorrowDate = br.BorrowDate,
+                    ReturnDate = br.ReturnDate,
+                    Status = "Borrowed"
+                })
+                .ToList();
+        }
+
+        public List<BorrowRecordResponse> GetBorrowHistory(int memberId)
+        {
+            return _context.BorrowRecords
+                .Include(br => br.Book)
+                .Include(br => br.Member)
+                .Where(br => br.MemberId == memberId)
+                .OrderByDescending(br => br.BorrowDate)
+                .Select(br => new BorrowRecordResponse
+                {
+                    BorrowRecordId = br.Id,
+                    BookId = br.BookId,
+                    BookTitle = br.Book!.Title,
+                    StudentName = br.Member!.Name,
+                    BorrowDate = br.BorrowDate,
+                    ReturnDate = br.ReturnDate,
+                    Status = br.ReturnDate == null
+                        ? "Borrowed"
+                        : "Returned"
+                })
+                .ToList();
         }
     }
 }
