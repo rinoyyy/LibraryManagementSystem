@@ -242,5 +242,17 @@ namespace LibraryManagementAPI.Controllers
 
             return Ok(history);
         }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("/api/borrowrecords")]
+        public IActionResult GetBorrowRecords(
+    [FromQuery] int pageNumber = 1,
+    [FromQuery] int pageSize = 5)
+        {
+            var records =
+                _bookService.GetBorrowRecords(pageNumber, pageSize);
+
+            return Ok(records);
+        }
     }
 }

@@ -263,5 +263,43 @@ namespace LibraryManagementAPI.Services
                 })
                 .ToList();
         }
+
+        public PagedResponse<BorrowRecordResponse> GetBorrowRecords(
+    int pageNumber,
+    int pageSize)
+        {
+            var query = _context.BorrowRecords
+                .Include(br => br.Book)
+                .Include(br => br.Member)
+                .OrderByDescending(br => br.BorrowDate);
+
+            var totalRecords = query.Count();
+
+            var items = query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(br => new BorrowRecordResponse
+                {
+                    BorrowRecordId = br.Id,
+                    BookId = br.BookId,
+                    BookTitle = br.Book!.Title,
+                    StudentName = br.Member!.Name,
+                    BorrowDate = br.BorrowDate,
+                    ReturnDate = br.ReturnDate,
+                    Status = br.ReturnDate == null
+                        ? "Borrowed"
+                        : "Returned"
+                })
+                .ToList();
+
+            return new PagedResponse<BorrowRecordResponse>
+            {
+                CurrentPage = pageNumber,
+                PageSize = pageSize,
+                TotalRecords = totalRecords,
+                TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize),
+                Items = items
+            };
+        }
     }
 }

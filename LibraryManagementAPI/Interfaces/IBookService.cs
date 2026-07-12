@@ -28,5 +28,9 @@ namespace LibraryManagementAPI.Interfaces
         List<BorrowRecordResponse> GetCurrentBorrowedBooks(int memberId);
 
         List<BorrowRecordResponse> GetBorrowHistory(int memberId);
+
+        PagedResponse<BorrowRecordResponse> GetBorrowRecords(
+    int pageNumber,
+    int pageSize);
     }
 }
