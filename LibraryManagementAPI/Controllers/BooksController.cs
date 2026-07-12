@@ -28,11 +28,15 @@ namespace LibraryManagementAPI.Controllers
             }
 
         [HttpGet]
-        public IActionResult GetBooks()
+        public IActionResult GetBooks(
+    [FromQuery] int pageNumber = 1,
+    [FromQuery] int pageSize = 5)
         {
-            _logger.LogInformation("Fetching all books.");
+            _logger.LogInformation("Fetching books page {Page}", pageNumber);
 
-            return Ok(_bookService.GetAllBooks());
+            return Ok(
+                _bookService.GetAllBooks(pageNumber, pageSize)
+            );
         }
 
         [HttpGet("count")]
@@ -201,7 +205,9 @@ namespace LibraryManagementAPI.Controllers
 
         [Authorize(Roles = "Student")]
         [HttpGet("mybooks")]
-        public IActionResult GetMyBorrowedBooks()
+        public IActionResult GetMyBorrowedBooks(
+    [FromQuery] int pageNumber = 1,
+    [FromQuery] int pageSize = 5)
         {
             var username = User.Identity!.Name!;
 
@@ -220,14 +226,19 @@ namespace LibraryManagementAPI.Controllers
                 "Fetching currently borrowed books for Member {MemberId}",
                 memberId);
 
-            var books = _bookService.GetCurrentBorrowedBooks(memberId.Value);
+            var books = _bookService.GetCurrentBorrowedBooks(
+    memberId.Value,
+    pageNumber,
+    pageSize);
 
             return Ok(books);
         }
 
         [Authorize(Roles = "Student")]
         [HttpGet("history")]
-        public IActionResult GetBorrowHistory()
+        public IActionResult GetBorrowHistory(
+    [FromQuery] int pageNumber = 1,
+    [FromQuery] int pageSize = 5)
         {
             var username = User.Identity!.Name!;
 
@@ -246,7 +257,10 @@ namespace LibraryManagementAPI.Controllers
                 "Fetching borrow history for Member {MemberId}",
                 memberId);
 
-            var history = _bookService.GetBorrowHistory(memberId.Value);
+            var history = _bookService.GetBorrowHistory(
+    memberId.Value,
+    pageNumber,
+    pageSize);
 
             return Ok(history);
         }

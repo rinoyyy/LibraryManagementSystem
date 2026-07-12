@@ -5,7 +5,9 @@ namespace LibraryManagementAPI.Interfaces
 {
     public interface IBookService
     {
-        List<BookResponse> GetAllBooks();
+        PagedResponse<BookResponse> GetAllBooks(
+    int pageNumber,
+    int pageSize);
 
         BookResponse? GetBookById(int id);
 
@@ -25,9 +27,15 @@ namespace LibraryManagementAPI.Interfaces
 
         bool ReturnBook(int bookId, int memberId);
 
-        List<BorrowRecordResponse> GetCurrentBorrowedBooks(int memberId);
+        PagedResponse<BorrowRecordResponse> GetCurrentBorrowedBooks(
+    int memberId,
+    int pageNumber,
+    int pageSize);
 
-        List<BorrowRecordResponse> GetBorrowHistory(int memberId);
+        PagedResponse<BorrowRecordResponse> GetBorrowHistory(
+     int memberId,
+     int pageNumber,
+     int pageSize);
 
         PagedResponse<BorrowRecordResponse> GetBorrowRecords(
     int pageNumber,

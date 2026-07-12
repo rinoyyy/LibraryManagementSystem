@@ -6,54 +6,102 @@ export default function StudentDashboard() {
     const [books, setBooks] = useState([]);
     const [myBooks, setMyBooks] = useState([]);
 
-    async function loadBooks() {
-        const response = await api.get("/books");
-        setBooks(response.data);
+    const [pageNumber, setPageNumber] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+
+    async function loadBooks(page = pageNumber) {
+
+        try {
+
+            const response = await api.get(
+                `/books?pageNumber=${page}&pageSize=5`
+            );
+
+            setBooks(response.data.items);
+            setPageNumber(response.data.currentPage);
+            setTotalPages(response.data.totalPages);
+
+        }
+        catch {
+
+            alert("Failed to load books");
+
+        }
+
     }
 
     async function loadMyBooks() {
-        const response = await api.get("/books/mybooks");
-        setMyBooks(response.data);
+
+        try {
+
+            const response = await api.get("/books/mybooks");
+
+            setMyBooks(response.data);
+
+        }
+        catch {
+
+            alert("Failed to load borrowed books");
+
+        }
+
     }
 
     async function borrowBook(bookId) {
+
         try {
+
             await api.post(`/books/${bookId}/borrow`);
 
-            loadBooks();
+            loadBooks(pageNumber);
             loadMyBooks();
+
         }
         catch {
+
             alert("Borrow failed");
+
         }
+
     }
 
     async function returnBook(bookId) {
+
         try {
+
             await api.post(`/books/${bookId}/return`);
 
-            loadBooks();
+            loadBooks(pageNumber);
             loadMyBooks();
+
         }
         catch {
+
             alert("Return failed");
+
         }
+
     }
 
     useEffect(() => {
+
         loadBooks();
         loadMyBooks();
+
     }, []);
 
     return (
+
         <div style={{ padding: 20 }}>
 
             <h1>Student Dashboard</h1>
 
-            <button onClick={() => {
-                localStorage.clear();
-                window.location.href = "/";
-            }}>
+            <button
+                onClick={() => {
+                    localStorage.clear();
+                    window.location.href = "/";
+                }}
+            >
                 Logout
             </button>
 
@@ -62,13 +110,18 @@ export default function StudentDashboard() {
             <h2>Available Books</h2>
 
             <table border="1" cellPadding="8">
+
                 <thead>
+
                     <tr>
+
                         <th>Title</th>
                         <th>Author</th>
                         <th>Available</th>
-                        <th></th>
+                        <th>Action</th>
+
                     </tr>
+
                 </thead>
 
                 <tbody>
@@ -78,9 +131,7 @@ export default function StudentDashboard() {
                         <tr key={book.id}>
 
                             <td>{book.title}</td>
-
                             <td>{book.author}</td>
-
                             <td>{book.availableCopies}</td>
 
                             <td>
@@ -102,6 +153,30 @@ export default function StudentDashboard() {
 
             </table>
 
+            <br />
+
+            <button
+                disabled={pageNumber === 1}
+                onClick={() => loadBooks(pageNumber - 1)}
+            >
+                Previous
+            </button>
+
+            {" "}
+
+            <span>
+                Page {pageNumber} of {totalPages}
+            </span>
+
+            {" "}
+
+            <button
+                disabled={pageNumber === totalPages}
+                onClick={() => loadBooks(pageNumber + 1)}
+            >
+                Next
+            </button>
+
             <hr />
 
             <h2>My Borrowed Books</h2>
@@ -113,10 +188,8 @@ export default function StudentDashboard() {
                     <tr>
 
                         <th>Book</th>
-
                         <th>Borrow Date</th>
-
-                        <th></th>
+                        <th>Action</th>
 
                     </tr>
 
@@ -151,5 +224,7 @@ export default function StudentDashboard() {
             </table>
 
         </div>
+
     );
+
 }

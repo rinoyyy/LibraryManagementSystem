@@ -15,19 +15,37 @@ namespace LibraryManagementAPI.Services
             _context = context;
         }
 
-        public List<BookResponse> GetAllBooks()
+        public PagedResponse<BookResponse> GetAllBooks(
+    int pageNumber,
+    int pageSize)
         {
-            return _context.Books
-                .Select(book => new BookResponse
+            var query = _context.Books
+                .OrderBy(b => b.Id);
+
+            var totalRecords = query.Count();
+
+            var items = query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(b => new BookResponse
                 {
-                    Id = book.Id,
-                    Title = book.Title,
-                    Author = book.Author,
-                    PublishedYear = book.PublishedYear,
-                    TotalCopies = book.TotalCopies,
-                    AvailableCopies = book.AvailableCopies
+                    Id = b.Id,
+                    Title = b.Title,
+                    Author = b.Author,
+                    PublishedYear = b.PublishedYear,
+                    TotalCopies = b.TotalCopies,
+                    AvailableCopies = b.AvailableCopies
                 })
                 .ToList();
+
+            return new PagedResponse<BookResponse>
+            {
+                CurrentPage = pageNumber,
+                PageSize = pageSize,
+                TotalRecords = totalRecords,
+                TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize),
+                Items = items
+            };
         }
 
         public BookResponse? GetBookById(int id)
@@ -221,14 +239,24 @@ namespace LibraryManagementAPI.Services
             return true;
         }
 
-        public List<BorrowRecordResponse> GetCurrentBorrowedBooks(int memberId)
+        public PagedResponse<BorrowRecordResponse> GetCurrentBorrowedBooks(
+    int memberId,
+    int pageNumber,
+    int pageSize)
         {
-            return _context.BorrowRecords
+            var query = _context.BorrowRecords
                 .Include(br => br.Book)
                 .Include(br => br.Member)
                 .Where(br =>
                     br.MemberId == memberId &&
                     br.ReturnDate == null)
+                .OrderByDescending(br => br.BorrowDate);
+
+            var totalRecords = query.Count();
+
+            var items = query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .Select(br => new BorrowRecordResponse
                 {
                     BorrowRecordId = br.Id,
@@ -240,15 +268,33 @@ namespace LibraryManagementAPI.Services
                     Status = "Borrowed"
                 })
                 .ToList();
+
+            return new PagedResponse<BorrowRecordResponse>
+            {
+                CurrentPage = pageNumber,
+                PageSize = pageSize,
+                TotalRecords = totalRecords,
+                TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize),
+                Items = items
+            };
         }
 
-        public List<BorrowRecordResponse> GetBorrowHistory(int memberId)
+        public PagedResponse<BorrowRecordResponse> GetBorrowHistory(
+    int memberId,
+    int pageNumber,
+    int pageSize)
         {
-            return _context.BorrowRecords
+            var query = _context.BorrowRecords
                 .Include(br => br.Book)
                 .Include(br => br.Member)
                 .Where(br => br.MemberId == memberId)
-                .OrderByDescending(br => br.BorrowDate)
+                .OrderByDescending(br => br.BorrowDate);
+
+            var totalRecords = query.Count();
+
+            var items = query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .Select(br => new BorrowRecordResponse
                 {
                     BorrowRecordId = br.Id,
@@ -262,6 +308,15 @@ namespace LibraryManagementAPI.Services
                         : "Returned"
                 })
                 .ToList();
+
+            return new PagedResponse<BorrowRecordResponse>
+            {
+                CurrentPage = pageNumber,
+                PageSize = pageSize,
+                TotalRecords = totalRecords,
+                TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize),
+                Items = items
+            };
         }
 
         public PagedResponse<BorrowRecordResponse> GetBorrowRecords(
