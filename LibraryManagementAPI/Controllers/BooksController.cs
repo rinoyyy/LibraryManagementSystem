@@ -27,6 +27,14 @@ namespace LibraryManagementAPI.Controllers
                 _logger = logger;
             }
 
+        [HttpGet]
+        public IActionResult GetBooks()
+        {
+            _logger.LogInformation("Fetching all books.");
+
+            return Ok(_bookService.GetAllBooks());
+        }
+
         [HttpGet("count")]
         public IActionResult GetBooksCount()
         {
@@ -253,6 +261,25 @@ namespace LibraryManagementAPI.Controllers
                 _bookService.GetBorrowRecords(pageNumber, pageSize);
 
             return Ok(records);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id}")]
+        public IActionResult DeleteBook(int id)
+        {
+            _logger.LogInformation("Deleting book with Id {Id}", id);
+
+            var deleted = _bookService.DeleteBook(id);
+
+            if (!deleted)
+            {
+                _logger.LogWarning("Book with Id {Id} not found", id);
+                return NotFound();
+            }
+
+            _logger.LogInformation("Book with Id {Id} deleted successfully", id);
+
+            return NoContent();
         }
     }
 }
