@@ -6,11 +6,51 @@ export default function BooksView({
     totalPages,
     loadBooks,
     editBook,
-    deleteBook
+    deleteBook,
+    search,
+    setSearch
 }) {
     return (
         <>
             <div className="table-container">
+
+            <div className="input-group mb-3">
+
+    <input
+        type="text"
+        className="form-control"
+        placeholder="Search Title or Author..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        onKeyDown={(e) => {
+
+            if (e.key === "Enter")
+                loadBooks(1);
+
+        }}
+    />
+
+    <button
+        className="btn btn-primary"
+        onClick={() => loadBooks(1)}
+    >
+        Search
+    </button>
+
+    <button
+        className="btn btn-outline-secondary"
+        onClick={() => {
+
+            setSearch("");
+
+            loadBooks(1);
+
+        }}
+    >
+        Clear
+    </button>
+
+</div>
 
                 <table className="table table-hover">
 

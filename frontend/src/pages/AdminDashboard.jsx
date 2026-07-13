@@ -39,6 +39,12 @@ export default function AdminDashboard() {
 
     const [editingBookId, setEditingBookId] = useState(null);
 
+    const [bookSearch, setBookSearch] = useState("");
+
+    const [recordSearch, setRecordSearch] = useState("");
+
+    
+
     async function loadDashboard() {
 
         const response = await api.get("/dashboard/admin");
@@ -50,8 +56,8 @@ export default function AdminDashboard() {
     async function loadBooks(page = 1) {
 
         const response = await api.get(
-            `/books?pageNumber=${page}&pageSize=5`
-        );
+    `/books?pageNumber=${page}&pageSize=5&search=${encodeURIComponent(bookSearch)}`
+);
 
         setBooks(response.data.items);
 
@@ -64,8 +70,8 @@ export default function AdminDashboard() {
     async function loadBorrowRecords(page = 1) {
 
         const response = await api.get(
-            `/borrowrecords?pageNumber=${page}&pageSize=5`
-        );
+    `/borrowrecords?pageNumber=${page}&pageSize=5&search=${encodeURIComponent(recordSearch)}`
+);
 
         setBorrowRecords(response.data.items);
 
@@ -201,13 +207,15 @@ export default function AdminDashboard() {
                 return (
 
                     <BooksView
-                        books={books}
-                        pageNumber={pageNumber}
-                        totalPages={totalPages}
-                        loadBooks={loadBooks}
-                        editBook={editBook}
-                        deleteBook={deleteBook}
-                    />
+    books={books}
+    pageNumber={pageNumber}
+    totalPages={totalPages}
+    loadBooks={loadBooks}
+    editBook={editBook}
+    deleteBook={deleteBook}
+    search={bookSearch}
+    setSearch={setBookSearch}
+/>
 
                 );
 
@@ -237,11 +245,13 @@ export default function AdminDashboard() {
                 return (
 
                     <BorrowRecordsView
-                        borrowRecords={borrowRecords}
-                        pageNumber={pageNumber}
-                        totalPages={totalPages}
-                        loadBorrowRecords={loadBorrowRecords}
-                    />
+    borrowRecords={borrowRecords}
+    pageNumber={pageNumber}
+    totalPages={totalPages}
+    loadBorrowRecords={loadBorrowRecords}
+    search={recordSearch}
+    setSearch={setRecordSearch}
+/>
 
                 );
 

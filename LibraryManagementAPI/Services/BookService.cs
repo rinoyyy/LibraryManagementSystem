@@ -17,10 +17,21 @@ namespace LibraryManagementAPI.Services
 
         public PagedResponse<BookResponse> GetAllBooks(
     int pageNumber,
-    int pageSize)
+    int pageSize,
+    string? search = null)
         {
-            var query = _context.Books
-                .OrderBy(b => b.Id);
+            var query = _context.Books.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim().ToLower();
+
+                query = query.Where(b =>
+                    b.Title.ToLower().Contains(search) ||
+                    b.Author.ToLower().Contains(search));
+            }
+
+            query = query.OrderBy(b => b.Id);
 
             var totalRecords = query.Count();
 
@@ -242,7 +253,8 @@ namespace LibraryManagementAPI.Services
         public PagedResponse<BorrowRecordResponse> GetCurrentBorrowedBooks(
     int memberId,
     int pageNumber,
-    int pageSize)
+    int pageSize,
+    string? search = null)
         {
             var query = _context.BorrowRecords
                 .Include(br => br.Book)
@@ -250,7 +262,18 @@ namespace LibraryManagementAPI.Services
                 .Where(br =>
                     br.MemberId == memberId &&
                     br.ReturnDate == null)
-                .OrderByDescending(br => br.BorrowDate);
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim().ToLower();
+
+                query = query.Where(br =>
+                    br.Book!.Title.ToLower().Contains(search) ||
+                    br.Book.Author.ToLower().Contains(search));
+            }
+
+            query = query.OrderByDescending(br => br.BorrowDate);
 
             var totalRecords = query.Count();
 
@@ -282,13 +305,25 @@ namespace LibraryManagementAPI.Services
         public PagedResponse<BorrowRecordResponse> GetBorrowHistory(
     int memberId,
     int pageNumber,
-    int pageSize)
+    int pageSize,
+    string? search = null)
         {
             var query = _context.BorrowRecords
                 .Include(br => br.Book)
                 .Include(br => br.Member)
                 .Where(br => br.MemberId == memberId)
-                .OrderByDescending(br => br.BorrowDate);
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim().ToLower();
+
+                query = query.Where(br =>
+                    br.Book!.Title.ToLower().Contains(search) ||
+                    br.Book.Author.ToLower().Contains(search));
+            }
+
+            query = query.OrderByDescending(br => br.BorrowDate);
 
             var totalRecords = query.Count();
 
@@ -321,12 +356,38 @@ namespace LibraryManagementAPI.Services
 
         public PagedResponse<BorrowRecordResponse> GetBorrowRecords(
     int pageNumber,
-    int pageSize)
+    int pageSize,
+    string? search = null)
         {
             var query = _context.BorrowRecords
                 .Include(br => br.Book)
                 .Include(br => br.Member)
-                .OrderByDescending(br => br.BorrowDate);
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim().ToLower();
+
+                query = query.Where(br =>
+
+                    br.Member!.Name.ToLower().Contains(search)
+
+                    ||
+
+                    br.Book!.Title.ToLower().Contains(search)
+
+                    ||
+
+                    br.Book.Author.ToLower().Contains(search)
+
+                    ||
+
+                    br.BorrowDate.ToString().ToLower().Contains(search)
+
+                );
+            }
+
+            query = query.OrderByDescending(br => br.BorrowDate);
 
             var totalRecords = query.Count();
 

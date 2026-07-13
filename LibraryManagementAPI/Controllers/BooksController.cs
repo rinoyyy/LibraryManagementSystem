@@ -30,12 +30,16 @@ namespace LibraryManagementAPI.Controllers
         [HttpGet]
         public IActionResult GetBooks(
     [FromQuery] int pageNumber = 1,
-    [FromQuery] int pageSize = 5)
+    [FromQuery] int pageSize = 5,
+    string? search = null)
         {
             _logger.LogInformation("Fetching books page {Page}", pageNumber);
 
             return Ok(
-                _bookService.GetAllBooks(pageNumber, pageSize)
+                _bookService.GetAllBooks(
+    pageNumber,
+    pageSize,
+    search)
             );
         }
 
@@ -237,8 +241,9 @@ namespace LibraryManagementAPI.Controllers
         [Authorize(Roles = "Student")]
         [HttpGet("history")]
         public IActionResult GetBorrowHistory(
-    [FromQuery] int pageNumber = 1,
-    [FromQuery] int pageSize = 5)
+    int pageNumber = 1,
+    int pageSize = 5,
+    string? search = null)
         {
             var username = User.Identity!.Name!;
 
@@ -260,7 +265,8 @@ namespace LibraryManagementAPI.Controllers
             var history = _bookService.GetBorrowHistory(
     memberId.Value,
     pageNumber,
-    pageSize);
+    pageSize,
+    search);
 
             return Ok(history);
         }
@@ -268,11 +274,15 @@ namespace LibraryManagementAPI.Controllers
         [Authorize(Roles = "Admin")]
         [HttpGet("/api/borrowrecords")]
         public IActionResult GetBorrowRecords(
-    [FromQuery] int pageNumber = 1,
-    [FromQuery] int pageSize = 5)
+    int pageNumber = 1,
+    int pageSize = 5,
+    string? search = null)
         {
             var records =
-                _bookService.GetBorrowRecords(pageNumber, pageSize);
+                _bookService.GetBorrowRecords(
+    pageNumber,
+    pageSize,
+    search);
 
             return Ok(records);
         }

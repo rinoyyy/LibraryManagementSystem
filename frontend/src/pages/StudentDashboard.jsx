@@ -30,6 +30,9 @@ const [myBooksTotalPages, setMyBooksTotalPages] = useState(1);
 const [pageNumber, setPageNumber] = useState(1);
 
 const [totalPages, setTotalPages] = useState(1);
+const [search, setSearch] = useState("");
+const [historySearch, setHistorySearch] = useState("");
+const [myBookSearch, setMyBookSearch] = useState("");
 
     async function loadDashboard() {
 
@@ -53,8 +56,8 @@ const [totalPages, setTotalPages] = useState(1);
     try {
 
         const response = await api.get(
-            `/books?pageNumber=${page}&pageSize=5`
-        );
+    `/books?pageNumber=${page}&pageSize=5&search=${encodeURIComponent(search)}`
+);
 
         setBooks(response.data.items);
         setPageNumber(response.data.currentPage);
@@ -74,8 +77,8 @@ async function loadMyBooks(page = 1) {
     try {
 
         const response = await api.get(
-            `/books/mybooks?pageNumber=${page}&pageSize=5`
-        );
+    `/books/mybooks?pageNumber=${page}&pageSize=5&search=${encodeURIComponent(myBookSearch)}`
+);
 
         setMyBooks(response.data.items);
 
@@ -97,8 +100,8 @@ async function loadHistory(page = 1) {
     try {
 
         const response = await api.get(
-            `/books/history?pageNumber=${page}&pageSize=5`
-        );
+    `/books/history?pageNumber=${page}&pageSize=5&search=${encodeURIComponent(historySearch)}`
+);
 
         setHistory(response.data.items);
 
@@ -222,7 +225,37 @@ async function returnBook(bookId) {
         <>
 
             <div className="table-container">
+                <div className="d-flex align-items-center gap-2 mb-3">
 
+    <input
+        className="form-control"
+        placeholder="Search by title or author..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        onKeyDown={(e) => {
+            if (e.key === "Enter")
+                loadBooks(1);
+        }}
+    />
+
+    <button
+        className="btn btn-primary"
+        onClick={() => loadBooks(1)}
+    >
+        Search
+    </button>
+
+    <button
+        className="btn btn-secondary"
+        onClick={() => {
+            setSearch("");
+            loadBooks(1);
+        }}
+    >
+        Clear
+    </button>
+
+</div>
                 <table className="table table-hover">
 
                     <thead>
@@ -313,6 +346,44 @@ async function returnBook(bookId) {
 
             <div className="table-container">
 
+                <div className="input-group mb-3">
+
+    <input
+        type="text"
+        className="form-control"
+        placeholder="Search by title or author..."
+        value={myBookSearch}
+        onChange={(e) => setMyBookSearch(e.target.value)}
+        onKeyDown={(e) => {
+
+            if (e.key === "Enter")
+                loadMyBooks(1);
+
+        }}
+    />
+
+    <button
+        className="btn btn-primary"
+        onClick={() => loadMyBooks(1)}
+    >
+        Search
+    </button>
+
+    <button
+        className="btn btn-outline-secondary"
+        onClick={() => {
+
+            setMyBookSearch("");
+
+            loadMyBooks(1);
+
+        }}
+    >
+        Clear
+    </button>
+
+</div>
+
                 <table className="table table-hover">
 
                     <thead>
@@ -399,6 +470,44 @@ async function returnBook(bookId) {
         <>
 
             <div className="table-container">
+
+                <div className="input-group mb-3">
+
+    <input
+        type="text"
+        className="form-control"
+        placeholder="Search by title or author..."
+        value={historySearch}
+        onChange={(e) => setHistorySearch(e.target.value)}
+        onKeyDown={(e) => {
+
+            if (e.key === "Enter")
+                loadHistory(1);
+
+        }}
+    />
+
+    <button
+        className="btn btn-primary"
+        onClick={() => loadHistory(1)}
+    >
+        Search
+    </button>
+
+    <button
+        className="btn btn-outline-secondary"
+        onClick={() => {
+
+            setHistorySearch("");
+
+            loadHistory(1);
+
+        }}
+    >
+        Clear
+    </button>
+
+</div>
 
                 <table className="table table-hover">
 

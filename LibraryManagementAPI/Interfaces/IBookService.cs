@@ -7,7 +7,8 @@ namespace LibraryManagementAPI.Interfaces
     {
         PagedResponse<BookResponse> GetAllBooks(
     int pageNumber,
-    int pageSize);
+    int pageSize,
+    string? search = null);
 
         BookResponse? GetBookById(int id);
 
@@ -30,15 +31,18 @@ namespace LibraryManagementAPI.Interfaces
         PagedResponse<BorrowRecordResponse> GetCurrentBorrowedBooks(
     int memberId,
     int pageNumber,
-    int pageSize);
+    int pageSize,
+    string? search = null);
 
         PagedResponse<BorrowRecordResponse> GetBorrowHistory(
-     int memberId,
-     int pageNumber,
-     int pageSize);
+    int memberId,
+    int pageNumber,
+    int pageSize,
+    string? search = null);
 
         PagedResponse<BorrowRecordResponse> GetBorrowRecords(
     int pageNumber,
-    int pageSize);
+    int pageSize,
+    string? search = null);
     }
 }
