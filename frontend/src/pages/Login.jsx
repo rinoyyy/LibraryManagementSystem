@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import api from "../api/axios";
 
 export default function Login() {
@@ -65,6 +66,17 @@ export default function Login() {
                 <button type="submit">
                     Login
                 </button>
+                <br /><br />
+
+<Link to="/register/student">
+    Register Student
+</Link>
+
+<br /><br />
+
+<Link to="/register/admin">
+    Register Admin
+</Link>
             </form>
         </div>
     );

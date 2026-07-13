@@ -1,229 +1,63 @@
-import { useEffect, useState } from "react";
-import api from "../api/axios";
+import { useState } from "react";
+
+import DashboardLayout from "../layouts/DashboardLayout";
 
 export default function StudentDashboard() {
 
-    const [books, setBooks] = useState([]);
-    const [myBooks, setMyBooks] = useState([]);
+    const [activeItem, setActiveItem] = useState("Dashboard");
 
-    const [pageNumber, setPageNumber] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
+    function renderContent() {
 
-    async function loadBooks(page = pageNumber) {
+        switch (activeItem) {
 
-        try {
+            case "Dashboard":
 
-            const response = await api.get(
-                `/books?pageNumber=${page}&pageSize=5`
-            );
+                return <h2>Dashboard</h2>;
 
-            setBooks(response.data.items);
-            setPageNumber(response.data.currentPage);
-            setTotalPages(response.data.totalPages);
+            case "Available Books":
 
-        }
-        catch {
+                return <h2>Available Books</h2>;
 
-            alert("Failed to load books");
+            case "My Books":
 
-        }
+                return <h2>My Books</h2>;
 
-    }
+            case "Borrow History":
 
-    async function loadMyBooks() {
+                return <h2>Borrow History</h2>;
 
-        try {
+            default:
 
-            const response = await api.get("/books/mybooks");
-
-            setMyBooks(response.data);
-
-        }
-        catch {
-
-            alert("Failed to load borrowed books");
+                return null;
 
         }
 
     }
-
-    async function borrowBook(bookId) {
-
-        try {
-
-            await api.post(`/books/${bookId}/borrow`);
-
-            loadBooks(pageNumber);
-            loadMyBooks();
-
-        }
-        catch {
-
-            alert("Borrow failed");
-
-        }
-
-    }
-
-    async function returnBook(bookId) {
-
-        try {
-
-            await api.post(`/books/${bookId}/return`);
-
-            loadBooks(pageNumber);
-            loadMyBooks();
-
-        }
-        catch {
-
-            alert("Return failed");
-
-        }
-
-    }
-
-    useEffect(() => {
-
-        loadBooks();
-        loadMyBooks();
-
-    }, []);
 
     return (
 
-        <div style={{ padding: 20 }}>
+        <DashboardLayout
 
-            <h1>Student Dashboard</h1>
+            title="Student Dashboard"
 
-            <button
-                onClick={() => {
-                    localStorage.clear();
-                    window.location.href = "/";
-                }}
-            >
-                Logout
-            </button>
+            username={localStorage.getItem("username")}
 
-            <hr />
+            menuItems={[
+                "Dashboard",
+                "Available Books",
+                "My Books",
+                "Borrow History"
+            ]}
 
-            <h2>Available Books</h2>
+            activeItem={activeItem}
 
-            <table border="1" cellPadding="8">
+            setActiveItem={setActiveItem}
 
-                <thead>
+        >
 
-                    <tr>
+            {renderContent()}
 
-                        <th>Title</th>
-                        <th>Author</th>
-                        <th>Available</th>
-                        <th>Action</th>
-
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    {books.map(book => (
-
-                        <tr key={book.id}>
-
-                            <td>{book.title}</td>
-                            <td>{book.author}</td>
-                            <td>{book.availableCopies}</td>
-
-                            <td>
-
-                                <button
-                                    disabled={book.availableCopies === 0}
-                                    onClick={() => borrowBook(book.id)}
-                                >
-                                    Borrow
-                                </button>
-
-                            </td>
-
-                        </tr>
-
-                    ))}
-
-                </tbody>
-
-            </table>
-
-            <br />
-
-            <button
-                disabled={pageNumber === 1}
-                onClick={() => loadBooks(pageNumber - 1)}
-            >
-                Previous
-            </button>
-
-            {" "}
-
-            <span>
-                Page {pageNumber} of {totalPages}
-            </span>
-
-            {" "}
-
-            <button
-                disabled={pageNumber === totalPages}
-                onClick={() => loadBooks(pageNumber + 1)}
-            >
-                Next
-            </button>
-
-            <hr />
-
-            <h2>My Borrowed Books</h2>
-
-            <table border="1" cellPadding="8">
-
-                <thead>
-
-                    <tr>
-
-                        <th>Book</th>
-                        <th>Borrow Date</th>
-                        <th>Action</th>
-
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    {myBooks.map(book => (
-
-                        <tr key={book.borrowRecordId}>
-
-                            <td>{book.bookTitle}</td>
-
-                            <td>{book.borrowDate}</td>
-
-                            <td>
-
-                                <button
-                                    onClick={() => returnBook(book.bookId)}
-                                >
-                                    Return
-                                </button>
-
-                            </td>
-
-                        </tr>
-
-                    ))}
-
-                </tbody>
-
-            </table>
-
-        </div>
+        </DashboardLayout>
 
     );
 
