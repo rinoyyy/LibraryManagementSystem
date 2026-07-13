@@ -6,9 +6,10 @@ export default function RegisterStudent() {
 
     const navigate = useNavigate();
 
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [fullName, setFullName] = useState("");
 
     async function register(e) {
 
@@ -17,9 +18,10 @@ export default function RegisterStudent() {
         try {
 
             await api.post("/auth/register/student", {
+                name,
+                email,
                 username,
-                password,
-                fullName
+                password
             });
 
             alert("Student registered successfully.");
@@ -27,7 +29,9 @@ export default function RegisterStudent() {
             navigate("/");
 
         }
-        catch {
+        catch (error) {
+
+            console.log(error.response?.data);
 
             alert("Registration failed.");
 
@@ -48,9 +52,7 @@ export default function RegisterStudent() {
             >
 
                 <h2 className="text-center mb-4">
-
                     Student Registration
-
                 </h2>
 
                 <form onSubmit={register}>
@@ -58,15 +60,13 @@ export default function RegisterStudent() {
                     <div className="mb-3">
 
                         <label className="form-label">
-
-                            Full Name
-
+                            Name
                         </label>
 
                         <input
                             className="form-control"
-                            value={fullName}
-                            onChange={(e)=>setFullName(e.target.value)}
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
                         />
 
                     </div>
@@ -74,15 +74,28 @@ export default function RegisterStudent() {
                     <div className="mb-3">
 
                         <label className="form-label">
+                            Email
+                        </label>
 
+                        <input
+                            className="form-control"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+
+                    </div>
+
+                    <div className="mb-3">
+
+                        <label className="form-label">
                             Username
-
                         </label>
 
                         <input
                             className="form-control"
                             value={username}
-                            onChange={(e)=>setUsername(e.target.value)}
+                            onChange={(e) => setUsername(e.target.value)}
                         />
 
                     </div>
@@ -90,16 +103,14 @@ export default function RegisterStudent() {
                     <div className="mb-3">
 
                         <label className="form-label">
-
                             Password
-
                         </label>
 
                         <input
                             className="form-control"
                             type="password"
                             value={password}
-                            onChange={(e)=>setPassword(e.target.value)}
+                            onChange={(e) => setPassword(e.target.value)}
                         />
 
                     </div>

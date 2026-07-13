@@ -6,6 +6,8 @@ export default function RegisterAdmin() {
 
     const navigate = useNavigate();
 
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
@@ -16,6 +18,8 @@ export default function RegisterAdmin() {
         try {
 
             await api.post("/auth/register/admin", {
+                name,
+                email,
                 username,
                 password
             });
@@ -25,7 +29,9 @@ export default function RegisterAdmin() {
             navigate("/");
 
         }
-        catch {
+        catch (error) {
+
+            console.log(error.response?.data);
 
             alert("Registration failed.");
 
@@ -57,6 +63,39 @@ export default function RegisterAdmin() {
 
                         <label className="form-label">
 
+                            Name
+
+                        </label>
+
+                        <input
+                            className="form-control"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                        />
+
+                    </div>
+
+                    <div className="mb-3">
+
+                        <label className="form-label">
+
+                            Email
+
+                        </label>
+
+                        <input
+                            className="form-control"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+
+                    </div>
+
+                    <div className="mb-3">
+
+                        <label className="form-label">
+
                             Username
 
                         </label>
@@ -64,7 +103,7 @@ export default function RegisterAdmin() {
                         <input
                             className="form-control"
                             value={username}
-                            onChange={(e)=>setUsername(e.target.value)}
+                            onChange={(e) => setUsername(e.target.value)}
                         />
 
                     </div>
@@ -81,7 +120,7 @@ export default function RegisterAdmin() {
                             className="form-control"
                             type="password"
                             value={password}
-                            onChange={(e)=>setPassword(e.target.value)}
+                            onChange={(e) => setPassword(e.target.value)}
                         />
 
                     </div>
