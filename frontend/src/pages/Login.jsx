@@ -1,83 +1,130 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 
 export default function Login() {
+
     const navigate = useNavigate();
 
     const [username, setUsername] = useState("");
+
     const [password, setPassword] = useState("");
 
-    async function handleLogin(e) {
+    async function login(e) {
+
         e.preventDefault();
 
         try {
+
             const response = await api.post("/auth/login", {
+
                 username,
                 password
+
             });
 
             localStorage.setItem("token", response.data.token);
-            localStorage.setItem("username", response.data.username);
+
             localStorage.setItem("role", response.data.role);
 
-            if (response.data.role === "Admin") {
+            localStorage.setItem("username", username);
+
+            if (response.data.role === "Admin")
                 navigate("/admin");
-            } else {
+            else
                 navigate("/student");
-            }
+
         }
         catch {
-            alert("Invalid username or password");
+
+            alert("Invalid username or password.");
+
         }
+
     }
 
     return (
+
         <div
-            style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                height: "100vh"
-            }}
+            className="container d-flex justify-content-center align-items-center"
+            style={{ minHeight: "100vh" }}
         >
-            <form onSubmit={handleLogin}>
-                <h1>Library Login</h1>
 
-                <input
-                    type="text"
-                    placeholder="Username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                />
+            <div
+                className="card shadow p-4"
+                style={{ width: "420px" }}
+            >
 
-                <br /><br />
+                <h2 className="text-center mb-4">
 
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
+                    📚 Library Management System
 
-                <br /><br />
+                </h2>
 
-                <button type="submit">
-                    Login
-                </button>
-                <br /><br />
+                <form onSubmit={login}>
 
-<Link to="/register/student">
-    Register Student
-</Link>
+                    <div className="mb-3">
 
-<br /><br />
+                        <label className="form-label">
 
-<Link to="/register/admin">
-    Register Admin
-</Link>
-            </form>
+                            Username
+
+                        </label>
+
+                        <input
+                            className="form-control"
+                            value={username}
+                            onChange={(e)=>setUsername(e.target.value)}
+                        />
+
+                    </div>
+
+                    <div className="mb-3">
+
+                        <label className="form-label">
+
+                            Password
+
+                        </label>
+
+                        <input
+                            className="form-control"
+                            type="password"
+                            value={password}
+                            onChange={(e)=>setPassword(e.target.value)}
+                        />
+
+                    </div>
+
+                    <button
+                        className="btn btn-primary w-100"
+                        type="submit"
+                    >
+                        Login
+                    </button>
+
+                </form>
+
+                <hr/>
+
+                <Link
+                    className="btn btn-outline-success mb-2"
+                    to="/register/student"
+                >
+                    Register Student
+                </Link>
+
+                <Link
+                    className="btn btn-outline-dark"
+                    to="/register/admin"
+                >
+                    Register Admin
+                </Link>
+
+            </div>
+
         </div>
+
     );
+
 }

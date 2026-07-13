@@ -17,7 +17,8 @@ namespace LibraryManagementAPI.Services
         {
             return new StudentDashboardResponse
             {
-                AvailableBooks = _context.Books.Sum(b => b.AvailableCopies),
+                // AvailableBooks = _context.Books.Sum(b => b.AvailableCopies),
+                AvailableBooks = _context.Books.Count(),
 
                 BorrowedBooks = _context.BorrowRecords.Count(br =>
                     br.MemberId == memberId &&

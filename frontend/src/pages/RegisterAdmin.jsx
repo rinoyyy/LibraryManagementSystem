@@ -1,17 +1,13 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 
-export default function RegisterStudent() {
+export default function RegisterAdmin() {
 
     const navigate = useNavigate();
 
-    const [form, setForm] = useState({
-        username: "",
-        password: "",
-        name: "",
-        email: ""
-    });
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
 
     async function register(e) {
 
@@ -19,7 +15,10 @@ export default function RegisterStudent() {
 
         try {
 
-            await api.post("/auth/register/admin", form);
+            await api.post("/auth/register/admin", {
+                username,
+                password
+            });
 
             alert("Admin registered successfully.");
 
@@ -36,50 +35,74 @@ export default function RegisterStudent() {
 
     return (
 
-        <div style={{ padding: 40 }}>
+        <div
+            className="container d-flex justify-content-center align-items-center"
+            style={{ minHeight: "100vh" }}
+        >
 
-            <h2>Register Admin</h2>
+            <div
+                className="card shadow p-4"
+                style={{ width: "450px" }}
+            >
 
-            <form onSubmit={register}>
+                <h2 className="text-center mb-4">
 
-                <input
-                    placeholder="Username"
-                    value={form.username}
-                    onChange={(e)=>setForm({...form,username:e.target.value})}
-                />
+                    Admin Registration
 
-                <br/><br/>
+                </h2>
 
-                <input
-                    placeholder="Password"
-                    type="password"
-                    value={form.password}
-                    onChange={(e)=>setForm({...form,password:e.target.value})}
-                />
+                <form onSubmit={register}>
 
-                <br/><br/>
+                    <div className="mb-3">
 
-                <input
-                    placeholder="Full Name"
-                    value={form.name}
-                    onChange={(e)=>setForm({...form,name:e.target.value})}
-                />
+                        <label className="form-label">
 
-                <br/><br/>
+                            Username
 
-                <input
-                    placeholder="Email"
-                    value={form.email}
-                    onChange={(e)=>setForm({...form,email:e.target.value})}
-                />
+                        </label>
 
-                <br/><br/>
+                        <input
+                            className="form-control"
+                            value={username}
+                            onChange={(e)=>setUsername(e.target.value)}
+                        />
 
-                <button type="submit">
-                    Register
-                </button>
+                    </div>
 
-            </form>
+                    <div className="mb-3">
+
+                        <label className="form-label">
+
+                            Password
+
+                        </label>
+
+                        <input
+                            className="form-control"
+                            type="password"
+                            value={password}
+                            onChange={(e)=>setPassword(e.target.value)}
+                        />
+
+                    </div>
+
+                    <button
+                        className="btn btn-dark w-100"
+                        type="submit"
+                    >
+                        Register Admin
+                    </button>
+
+                </form>
+
+                <Link
+                    className="btn btn-link mt-3"
+                    to="/"
+                >
+                    Back to Login
+                </Link>
+
+            </div>
 
         </div>
 

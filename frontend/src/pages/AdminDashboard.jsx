@@ -1,9 +1,26 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 
+import DashboardLayout from "../layouts/DashboardLayout";
+import DashboardCard from "../components/dashboard/DashboardCard";
+
+import BooksView from "../components/books/BooksView";
+import BookForm from "../components/books/BookForm";
+import BorrowRecordsView from "../components/borrow/BorrowRecordsView";
+
 export default function AdminDashboard() {
 
+    const [activeItem, setActiveItem] = useState("Dashboard");
+
+    const [stats, setStats] = useState({
+        totalBooks: 0,
+        availableBooks: 0,
+        borrowedBooks: 0,
+        students: 0
+    });
+
     const [books, setBooks] = useState([]);
+
     const [borrowRecords, setBorrowRecords] = useState([]);
 
     const [pageNumber, setPageNumber] = useState(1);
@@ -11,20 +28,40 @@ export default function AdminDashboard() {
     const [totalPages, setTotalPages] = useState(1);
 
     const [title, setTitle] = useState("");
+
     const [author, setAuthor] = useState("");
+
     const [publishedYear, setPublishedYear] = useState("");
+
     const [totalCopies, setTotalCopies] = useState("");
-    const [editingBookId, setEditingBookId] = useState(null);
+
     const [availableCopies, setAvailableCopies] = useState("");
 
-    async function loadBooks() {
-        const response = await api.get("/books");
-        setBooks(response.data);
+    const [editingBookId, setEditingBookId] = useState(null);
+
+    async function loadDashboard() {
+
+        const response = await api.get("/dashboard/admin");
+
+        setStats(response.data);
+
     }
 
-    async function loadBorrowRecords(page = pageNumber) {
+    async function loadBooks(page = 1) {
 
-    try {
+        const response = await api.get(
+            `/books?pageNumber=${page}&pageSize=5`
+        );
+
+        setBooks(response.data.items);
+
+        setPageNumber(response.data.currentPage);
+
+        setTotalPages(response.data.totalPages);
+
+    }
+
+    async function loadBorrowRecords(page = 1) {
 
         const response = await api.get(
             `/borrowrecords?pageNumber=${page}&pageSize=5`
@@ -32,32 +69,21 @@ export default function AdminDashboard() {
 
         setBorrowRecords(response.data.items);
 
-        setPageNumber(response.data.currentPage);
-
-        setTotalPages(response.data.totalPages);
-
     }
-    catch {
-
-        alert("Failed to load borrow records");
-
-    }
-
-}
 
     async function saveBook(e) {
 
-    e.preventDefault();
-
-    try {
+        e.preventDefault();
 
         if (editingBookId === null) {
 
             await api.post("/books", {
+
                 title,
                 author,
                 publishedYear: Number(publishedYear),
                 totalCopies: Number(totalCopies)
+
             });
 
         }
@@ -83,26 +109,27 @@ export default function AdminDashboard() {
         setTotalCopies("");
         setAvailableCopies("");
 
+        loadDashboard();
         loadBooks();
 
     }
-    catch {
-
-        alert("Operation failed");
-
-    }
-
-}
 
     function editBook(book) {
 
         setEditingBookId(book.id);
 
         setTitle(book.title);
+
         setAuthor(book.author);
+
         setPublishedYear(book.publishedYear);
+
         setTotalCopies(book.totalCopies);
+
         setAvailableCopies(book.availableCopies);
+
+        setActiveItem("Add Book");
+
     }
 
     async function deleteBook(id) {
@@ -110,250 +137,146 @@ export default function AdminDashboard() {
         if (!window.confirm("Delete this book?"))
             return;
 
-        try {
+        await api.delete(`/books/${id}`);
 
-            await api.delete(`/books/${id}`);
+        loadDashboard();
 
-            loadBooks();
-
-        }
-        catch {
-
-            alert("Delete failed");
-
-        }
+        loadBooks();
 
     }
 
     useEffect(() => {
 
-    loadBooks();
+        loadDashboard();
 
-    loadBorrowRecords();
+        loadBooks();
 
-}, []);
+        loadBorrowRecords();
+
+    }, []);
+
+    function renderContent() {
+
+        switch (activeItem) {
+
+            case "Dashboard":
+
+                return (
+
+                    <div className="row g-4">
+
+                        <DashboardCard
+                            title="Total Books"
+                            value={stats.totalBooks}
+                            icon="bi-book"
+                            color="primary"
+                        />
+
+                        <DashboardCard
+                            title="Available"
+                            value={stats.availableBooks}
+                            icon="bi-check-circle"
+                            color="success"
+                        />
+
+                        <DashboardCard
+                            title="Borrowed"
+                            value={stats.borrowedBooks}
+                            icon="bi-journal-bookmark"
+                            color="warning"
+                        />
+
+                        <DashboardCard
+                            title="Students"
+                            value={stats.students}
+                            icon="bi-people"
+                            color="dark"
+                        />
+
+                    </div>
+
+                );
+                        case "Books":
+
+                return (
+
+                    <BooksView
+                        books={books}
+                        pageNumber={pageNumber}
+                        totalPages={totalPages}
+                        loadBooks={loadBooks}
+                        editBook={editBook}
+                        deleteBook={deleteBook}
+                    />
+
+                );
+
+            case "Add Book":
+
+                return (
+
+                    <BookForm
+                        title={title}
+                        setTitle={setTitle}
+                        author={author}
+                        setAuthor={setAuthor}
+                        publishedYear={publishedYear}
+                        setPublishedYear={setPublishedYear}
+                        totalCopies={totalCopies}
+                        setTotalCopies={setTotalCopies}
+                        availableCopies={availableCopies}
+                        setAvailableCopies={setAvailableCopies}
+                        editingBookId={editingBookId}
+                        saveBook={saveBook}
+                    />
+
+                );
+
+            case "Borrow Records":
+
+                return (
+
+                    <BorrowRecordsView
+                        borrowRecords={borrowRecords}
+                        pageNumber={pageNumber}
+                        totalPages={totalPages}
+                        loadBorrowRecords={loadBorrowRecords}
+                    />
+
+                );
+
+            default:
+
+                return null;
+
+        }
+
+    }
 
     return (
 
-        <div style={{ padding: 20 }}>
+        <DashboardLayout
 
-            <h1>Admin Dashboard</h1>
+            title="Admin Dashboard"
 
-            <button
-                onClick={() => {
+            username={localStorage.getItem("username")}
 
-                    localStorage.clear();
+            menuItems={[
+                "Dashboard",
+                "Books",
+                "Add Book",
+                "Borrow Records"
+            ]}
 
-                    window.location.href = "/";
+            activeItem={activeItem}
 
-                }}
-            >
-                Logout
-            </button>
+            setActiveItem={setActiveItem}
 
-            <hr />
+        >
 
-            <h2>Add Book</h2>
+            {renderContent()}
 
-            <form onSubmit={saveBook}>
-
-                <input
-                    placeholder="Title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                />
-
-                <br /><br />
-
-                <input
-                    placeholder="Author"
-                    value={author}
-                    onChange={(e) => setAuthor(e.target.value)}
-                />
-
-                <br /><br />
-
-                <input
-                    placeholder="Published Year"
-                    value={publishedYear}
-                    onChange={(e) => setPublishedYear(e.target.value)}
-                />
-
-                <br /><br />
-
-                <input
-                    placeholder="Total Copies"
-                    value={totalCopies}
-                    onChange={(e) => setTotalCopies(e.target.value)}
-                />
-
-                <br /><br />
-
-                {editingBookId !== null && (
-
-    <>
-        <br /><br />
-
-        <input
-            placeholder="Available Copies"
-            value={availableCopies}
-            onChange={(e) => setAvailableCopies(e.target.value)}
-        />
-    </>
-
-)}<br/><br/>
-
-                <button type="submit">
-
-    {editingBookId === null ? "Add Book" : "Update Book"}
-
-</button>
-
-            </form>
-
-            <hr />
-
-            <h2>Books</h2>
-
-            <table border="1" cellPadding="8">
-
-                <thead>
-
-                    <tr>
-
-                        <th>Title</th>
-
-                        <th>Author</th>
-
-                        <th>Year</th>
-
-                        <th>Available</th>
-
-                        <th>Total</th>
-
-                        <th></th>
-
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    {books.map(book => (
-
-                        <tr key={book.id}>
-
-                            <td>{book.title}</td>
-
-                            <td>{book.author}</td>
-
-                            <td>{book.publishedYear}</td>
-
-                            <td>{book.availableCopies}</td>
-
-                            <td>{book.totalCopies}</td>
-
-                            <td>
-
-    <button
-        onClick={() => editBook(book)}
-    >
-        Edit
-    </button>
-
-    {" "}
-
-    <button
-        onClick={() => deleteBook(book.id)}
-    >
-        Delete
-    </button>
-
-</td>
-
-                        </tr>
-
-                    ))}
-
-                </tbody>
-
-            </table>
-
-            <hr />
-
-<h2>Borrow Records</h2>
-
-<table border="1" cellPadding="8">
-
-    <thead>
-
-        <tr>
-
-            <th>Student</th>
-
-            <th>Book</th>
-
-            <th>Borrow Date</th>
-
-            <th>Return Date</th>
-
-            <th>Status</th>
-
-        </tr>
-
-    </thead>
-
-    <tbody>
-
-        {borrowRecords.map(record => (
-
-            <tr key={record.borrowRecordId}>
-
-                <td>{record.studentName}</td>
-
-                <td>{record.bookTitle}</td>
-
-                <td>{record.borrowDate}</td>
-
-                <td>{record.returnDate ?? "-"}</td>
-
-                <td>{record.status}</td>
-
-            </tr>
-
-        ))}
-
-    </tbody>
-
-</table>
-
-<br />
-
-<button
-    disabled={pageNumber === 1}
-    onClick={() => loadBorrowRecords(pageNumber - 1)}
->
-    Previous
-</button>
-
-{" "}
-
-<span>
-
-    Page {pageNumber} of {totalPages}
-
-</span>
-
-{" "}
-
-<button
-    disabled={pageNumber === totalPages}
-    onClick={() => loadBorrowRecords(pageNumber + 1)}
->
-    Next
-</button>
-
-        </div>
+        </DashboardLayout>
 
     );
 
