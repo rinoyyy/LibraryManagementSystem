@@ -69,13 +69,17 @@ export default function AdminDashboard() {
 
     async function loadBorrowRecords(page = 1) {
 
-        const response = await api.get(
-    `/borrowrecords?pageNumber=${page}&pageSize=5&search=${encodeURIComponent(recordSearch)}`
-);
+    const response = await api.get(
+        `/borrowrecords?pageNumber=${page}&pageSize=5&search=${encodeURIComponent(recordSearch)}`
+    );
 
-        setBorrowRecords(response.data.items);
+    setBorrowRecords(response.data.items);
 
-    }
+    setPageNumber(response.data.currentPage);
+
+    setTotalPages(response.data.totalPages);
+
+}
 
     async function saveBook(e) {
 

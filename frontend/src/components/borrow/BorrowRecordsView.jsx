@@ -19,7 +19,7 @@ export default function BorrowRecordsView({
     <input
         type="text"
         className="form-control"
-        placeholder="Search Student, Book, Author or Date..."
+        placeholder="Search Student, Book or Author ..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         onKeyDown={(e) => {

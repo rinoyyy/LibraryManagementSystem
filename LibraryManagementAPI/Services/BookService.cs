@@ -382,7 +382,11 @@ namespace LibraryManagementAPI.Services
 
                     ||
 
-                    br.BorrowDate.ToString().ToLower().Contains(search)
+                    br.BorrowDate.ToString("yyyy/MM/dd").Contains(search)
+
+                    ||
+
+                    br.BorrowDate.ToString("yyyy-MM-dd").Contains(search)
 
                 );
             }
