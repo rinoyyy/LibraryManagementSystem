@@ -43,6 +43,7 @@ namespace LibraryManagementAPI.Interfaces
         PagedResponse<BorrowRecordResponse> GetBorrowRecords(
     int pageNumber,
     int pageSize,
-    string? search = null);
+    string? search = null,
+    DateTime? borrowDate = null);
     }
 }

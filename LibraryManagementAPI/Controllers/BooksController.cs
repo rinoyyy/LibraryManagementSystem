@@ -276,13 +276,15 @@ namespace LibraryManagementAPI.Controllers
         public IActionResult GetBorrowRecords(
     int pageNumber = 1,
     int pageSize = 5,
-    string? search = null)
+    string? search = null,
+    DateTime? borrowDate = null)
         {
             var records =
                 _bookService.GetBorrowRecords(
     pageNumber,
     pageSize,
-    search);
+    search,
+    borrowDate);
 
             return Ok(records);
         }

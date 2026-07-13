@@ -6,7 +6,9 @@ export default function BorrowRecordsView({
     totalPages,
     loadBorrowRecords,
     search,
-    setSearch
+    setSearch,
+    borrowDate,
+    setBorrowDate
 }) {
 
     return (
@@ -14,41 +16,56 @@ export default function BorrowRecordsView({
 
             <div className="table-container">
 
-                <div className="input-group mb-3">
+            <div className="row mb-3">
 
-    <input
-        type="text"
-        className="form-control"
-        placeholder="Search Student, Book or Author ..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        onKeyDown={(e) => {
+    <div className="col-md-6">
 
-            if (e.key === "Enter")
+        <input
+            type="text"
+            className="form-control"
+            placeholder="Search Student, Book or Author..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+        />
+
+    </div>
+
+    <div className="col-md-3">
+
+        <input
+            type="date"
+            className="form-control"
+            value={borrowDate}
+            onChange={(e) => setBorrowDate(e.target.value)}
+        />
+
+    </div>
+
+    <div className="col-md-3 d-flex gap-2">
+
+        <button
+            className="btn btn-primary"
+            onClick={() => loadBorrowRecords(1)}
+        >
+            Search
+        </button>
+
+        <button
+            className="btn btn-secondary"
+            onClick={() => {
+
+                setSearch("");
+
+                setBorrowDate("");
+
                 loadBorrowRecords(1);
 
-        }}
-    />
+            }}
+        >
+            Clear
+        </button>
 
-    <button
-        className="btn btn-primary"
-        onClick={() => loadBorrowRecords(1)}
-    >
-        Search
-    </button>
-
-    <button
-        className="btn btn-outline-secondary"
-        onClick={() => {
-
-            setSearch("");
-
-            loadBorrowRecords(1);
-
-        }}
-    >
-        Clear
-    </button>
+    </div>
 
 </div>
 

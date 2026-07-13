@@ -357,7 +357,8 @@ namespace LibraryManagementAPI.Services
         public PagedResponse<BorrowRecordResponse> GetBorrowRecords(
     int pageNumber,
     int pageSize,
-    string? search = null)
+    string? search = null,
+    DateTime? borrowDate = null)
         {
             var query = _context.BorrowRecords
                 .Include(br => br.Book)
@@ -380,15 +381,24 @@ namespace LibraryManagementAPI.Services
 
                     br.Book.Author.ToLower().Contains(search)
 
-                    ||
+                    
 
-                    br.BorrowDate.ToString("yyyy/MM/dd").Contains(search)
-
-                    ||
-
-                    br.BorrowDate.ToString("yyyy-MM-dd").Contains(search)
+                    
 
                 );
+            }
+
+            if (borrowDate.HasValue)
+            {
+                var startDate = DateTime.SpecifyKind(
+                    borrowDate.Value.Date,
+                    DateTimeKind.Utc);
+
+                var endDate = startDate.AddDays(1);
+
+                query = query.Where(br =>
+                    br.BorrowDate >= startDate &&
+                    br.BorrowDate < endDate);
             }
 
             query = query.OrderByDescending(br => br.BorrowDate);

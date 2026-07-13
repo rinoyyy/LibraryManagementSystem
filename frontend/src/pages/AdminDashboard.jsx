@@ -43,6 +43,8 @@ export default function AdminDashboard() {
 
     const [recordSearch, setRecordSearch] = useState("");
 
+    const [borrowDate, setBorrowDate] = useState("");
+
     
 
     async function loadDashboard() {
@@ -70,7 +72,7 @@ export default function AdminDashboard() {
     async function loadBorrowRecords(page = 1) {
 
     const response = await api.get(
-        `/borrowrecords?pageNumber=${page}&pageSize=5&search=${encodeURIComponent(recordSearch)}`
+        `/borrowrecords?pageNumber=${page}&pageSize=5&search=${encodeURIComponent(recordSearch)}&borrowDate=${borrowDate}`
     );
 
     setBorrowRecords(response.data.items);
@@ -255,6 +257,8 @@ export default function AdminDashboard() {
     loadBorrowRecords={loadBorrowRecords}
     search={recordSearch}
     setSearch={setRecordSearch}
+    borrowDate={borrowDate}
+    setBorrowDate={setBorrowDate}
 />
 
                 );
