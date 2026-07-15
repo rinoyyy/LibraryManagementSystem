@@ -210,8 +210,9 @@ namespace LibraryManagementAPI.Controllers
         [Authorize(Roles = "Student")]
         [HttpGet("mybooks")]
         public IActionResult GetMyBorrowedBooks(
-    [FromQuery] int pageNumber = 1,
-    [FromQuery] int pageSize = 5)
+     [FromQuery] int pageNumber = 1,
+     [FromQuery] int pageSize = 5,
+     [FromQuery] string? search = null)
         {
             var username = User.Identity!.Name!;
 
@@ -231,9 +232,10 @@ namespace LibraryManagementAPI.Controllers
                 memberId);
 
             var books = _bookService.GetCurrentBorrowedBooks(
-    memberId.Value,
-    pageNumber,
-    pageSize);
+                memberId.Value,
+                pageNumber,
+                pageSize,
+                search);
 
             return Ok(books);
         }
